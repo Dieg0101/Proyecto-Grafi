@@ -224,6 +224,22 @@ bombolin_selected = False
 robot_selected = False
 three_selected = True
 so.sonido_musica("Sounds/Music.wav")
+
+def seleccion():
+    glTranslatef(0,-2,-5)
+    glOrtho(0,15,0,15,0,6)
+    global mouse_active,menu_active, show_instructions
+    global three_selected, trixor_selected, bombolin_selected, robot_selected
+    mouse_active = True
+    menu_active = False #Se desactiva el menu
+    show_instructions = False
+    so.stop()
+    so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
+    three_selected=True
+    trixor_selected=False
+    bombolin_selected=False
+    robot_selected=False
+
 while True:
     
     for event in py.event.get():
@@ -240,43 +256,13 @@ while True:
             #Acciones que se tomaran a cabo cuando se seleccione un elemento del menu
             elif menu_active and event.key == py.K_RETURN:
                 if selected_item == 0:      #Si se selecciona la opcion de Fundamentos de Programacion
-                    glTranslatef(0,-2,-5)
-                    glOrtho(0,15,0,15,0,6)
-                    mouse_active = True
-                    menu_active = False #Se desactiva el menu
-                    show_instructions = False
-                    so.stop()
-                    so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
-                    three_selected=True
-                    trixor_selected=False
-                    bombolin_selected=False
-                    robot_selected=False
+                    seleccion()
                     
                 elif selected_item == 1:
-                    glTranslatef(0,-2,-5)
-                    glOrtho(0,15,0,15,0,6)   
-                    mouse_active = True                 
-                    menu_active = False
-                    show_instructions = False
-                    so.stop()
-                    so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
-                    three_selected=True
-                    trixor_selected=False
-                    bombolin_selected=False
-                    robot_selected=False
+                    seleccion()
                     
                 elif selected_item == 2:
-                    glTranslatef(0,-2,-5)
-                    glOrtho(0,15,0,15,0,6)
-                    mouse_active = True                   
-                    menu_active = False
-                    show_instructions = False
-                    so.stop()
-                    so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
-                    three_selected=True
-                    trixor_selected=False
-                    bombolin_selected=False
-                    robot_selected=False
+                    seleccion()
                     
                 elif selected_item == 3:  # Instrucciones
                     show_instructions = True
