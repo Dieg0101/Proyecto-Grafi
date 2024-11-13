@@ -225,7 +225,7 @@ bombolin_selected = False
 robot_selected = False
 three_selected = True
 keyboard_lock = False
-nivel_seleccionado, intentos_restantes = 0, 0
+nivel_seleccionado, intentos_restantes, intentos = 0, 0, 0
 trixor_selected2 = False
 bombolin_selected2 = False
 robot_selected2 = False
@@ -245,55 +245,39 @@ def seleccion():
     trixor_selected=False
     bombolin_selected=False
     robot_selected=False
-
-#def ahorcado():
-#    # Lista de palabras posibles para el juego
-#    palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
-#
-#    # Selecciona una palabra al azar de la lista
-#    palabra = random.choice(palabras).lower()
-#    letras_adivinadas = set()  # Letras que el jugador ha adivinado
-#    global letra, banderas, bandera_actual
-#    letra = ""
-#
-#    # Función para mostrar el progreso actual de la palabra
-def mostrar_palabra(palabra):
+# Lista de palabras y lógica del juego
+palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+# Función para reiniciar el juego
+palabra = random.choice(palabras).lower()
+palabra_adivinada = Falsepalabra = random.choice(palabras).lower()
+letras_adivinadas = set()
+palabra_adivinada = False
+current_variant_index = 0
+instrucciones_ahorcado = [""]
+def reset_game(intentos, nivel_seleccionado):
+    global palabra, letras_adivinadas, intentos_restantes, palabra_adivinada, current_variant_index, instrucciones_ahorcado
+    if nivel_seleccionado == 1:
+        palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+    elif nivel_seleccionado == 2:
+        palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+    else:
+        palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+    palabra = random.choice(palabras).lower()
+    letras_adivinadas = set()
+    intentos_restantes = intentos
+    palabra_adivinada = False
+    current_variant_index = 0
+    instrucciones_ahorcado = [
+        "Adivina la palabra:",
+        f"Intentos restantes: {intentos_restantes}",
+        "Usa el teclado para ingresar letras.",
+        "0: Salir del juego",
+        "9: Reiniciar juego"
+    ]
+# Función para mostrar la palabra en progreso con formato de "_ _ _ _"
+def mostrar_palabra_formateada():
     return " ".join([letra if letra in letras_adivinadas else "_" for letra in palabra])
-#    while bandera_actual > 0:
-#        if letra in letras_adivinadas:
-#            glPushMatrix()
-#            txt.draw_text("Ya has adivinado esa letra. Intenta con otra.",-20,-5,30,25,255,255,255,0,0,0)
-#            glPopMatrix()
-#            continue
-#        
-#        # Agrega la letra a las letras adivinadas
-#        letras_adivinadas.add(letra)
-#        # Verifica si la letra está en la palabra
-#        if letra in palabra:
-#            glPushMatrix()
-#            txt.draw_text(f"¡Bien hecho! La letra '{letra}' está en la palabra.",-20,-5,30,25,255,255,255,0,0,0)
-#            glPopMatrix()
-#        else:
-#            glPushMatrix()
-#            txt.draw_text(f"La letra '{letra}' no está en la palabra.",-20,-5,30,25,255,255,255,0,0,0)
-#            glPopMatrix()
-#            banderas[bandera_actual] = False
-#            bandera_actual -= 1
-#        # Verifica si el jugador ha ganado
-#        if all(letra in letras_adivinadas for letra in palabra):
-#            glPushMatrix()
-#            txt.draw_text(("¡Felicidades! Has adivinado la palabra:" + palabra),-20,-5,30,25,255,255,255,0,0,0)
-#            glPopMatrix()
-#        glPushMatrix()
-#        txt.draw_text("¡Bienvenido al juego de ahorcado!",-20,20,30,25,255,255,255,0,0,0)
-#        #txt.draw_text("_ " * len(palabra),-20,15,30,25,255,255,255,0,0,0)
-#        txt.draw_text(("Palabra: " + mostrar_palabra()),-20,10,30,25,255,255,255,0,0,0)
-#        txt.draw_text(f"Intentos restantes: {bandera_actual}",-20,5,30,25,255,255,255,0,0,0)
-#        txt.draw_text("Adivina una letra: ",-20,0,30,25,255,255,255,0,0,0)
-#        glPopMatrix()
-#    else:
-#        txt.draw_text(("Lo siento, te has quedado sin intentos. La palabra era:" + palabra),-20,10,30,25,255,255,255,0,0,0)
-#
+
 while True:
     
     for event in py.event.get():
@@ -360,6 +344,32 @@ while True:
                 if event.key == py.K_0:
                     py.quit()
                     quit()
+                # Reiniciar el juego al presionar 'R'
+                if event.key == py.K_9:
+                    reset_game(intentos,nivel_seleccionado)
+    
+                # Captura de letras para el juego de ahorcado si la palabra aún no ha sido adivinada
+                if not palabra_adivinada and intentos_restantes > 0 and event.unicode.isalpha() and len(event.unicode) == 1:
+                    letra = event.unicode.lower()
+                    if letra not in letras_adivinadas:
+                        letras_adivinadas.add(letra)
+                        if letra not in palabra:
+                            intentos_restantes -= 1
+                            instrucciones_ahorcado[1] = f"Intentos restantes: {intentos_restantes}"
+                            instrucciones_ahorcado.append(f"La letra '{letra}' no está en la palabra.")
+                        else:
+                            instrucciones_ahorcado.append(f"¡Bien hecho! La letra '{letra}' está en la palabra.")
+                        # Verificar si se han quedado sin intentos
+                        if intentos_restantes == 0:
+                            instrucciones_ahorcado.append("Te has quedado sin intentos.")
+                            instrucciones_ahorcado.append(f"La palabra correcta era: {palabra}")
+                            current_variant_index = 5
+    
+                    # Verificar si se adivinó la palabra
+                    if all(letra in letras_adivinadas for letra in palabra):
+                        palabra_adivinada = True
+                        instrucciones_ahorcado.append("¡Felicidades! Has adivinado la palabra.")
+                        current_variant_index = 3  # Cambiar a la variante 3 del robot
             else:
                 if menu_active and event.key == py.K_DOWN:
                     selected_item = (selected_item + 1) % len(menu_items)
@@ -454,7 +464,16 @@ while True:
                     mouse_active = False
                     if trixor_selected:
                         trixor_selected2 = True
-                    
+                        intentos = 10
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
+                    elif bombolin_selected:
+                        bombolin_selected2 = True
+                        intentos = 5
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
+                    else:
+                        robot_selected2 = True
+                        intentos = 3
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
     
                 # Controles de la cámara
                 keys = py.key.get_pressed()
@@ -580,7 +599,6 @@ while True:
             glDisable(GL_TEXTURE_2D)
             instruction.draw_instructions(instrucciones_Trixor, 500, 10)    
             glPopMatrix()
-            intentos_restantes = 10
             #ahorcado()
         if bombolin_selected2:
             #TRASLADAR PERSONAJE AL FONDO
@@ -618,48 +636,8 @@ while True:
             instruction.draw_instructions(instrucciones_Robot, 500, 10)
             glPopMatrix()
         if trixor_selected2 or bombolin_selected2 or robot_selected2:
-            if nivel_seleccionado == 1:
-                palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
-            elif nivel_seleccionado == 2:
-                palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
-            else:
-                palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
-            palabra = random.choice(palabras).lower()
-            letras_adivinadas = set()  # Letras que el jugador ha adivinado
-            letra = ""
-            #while intentos_restantes > 0:
-            #    # Verifica si la letra ya fue adivinada
-            #    if letra in letras_adivinadas:
-            #        glPushMatrix()
-            #        txt.draw_text("Ya has adivinado esa letra. Intenta con otra.",-20,-5,30,25,255,255,255,0,0,0)
-            #        glPopMatrix()
-            #        continue
-            #    
-            #    # Agrega la letra a las letras adivinadas
-            #    letras_adivinadas.add(letra)
-            #    # Verifica si la letra está en la palabra
-            #    if letra in palabra:
-            #        glPushMatrix()
-            #        txt.draw_text(f"¡Bien hecho! La letra '{letra}' está en la palabra.",-20,-5,30,25,255,255,255,0,0,0)
-            #        glPopMatrix()
-            #    else:
-            #        glPushMatrix()
-            #        txt.draw_text(f"La letra '{letra}' no está en la palabra.",-20,-5,30,25,255,255,255,0,0,0)
-            #        glPopMatrix()
-            #        intentos_restantes -= 1
-            #    # Verifica si el jugador ha ganado
-            #    if all(letra in letras_adivinadas for letra in palabra):
-            #        glPushMatrix()
-            #        txt.draw_text(("¡Felicidades! Has adivinado la palabra:" + palabra),-20,-5,30,25,255,255,255,0,0,0)
-            #        glPopMatrix()
-            #    glPushMatrix()
-            #    txt.draw_text("¡Bienvenido al juego de ahorcado!",-20,20,30,25,255,255,255,0,0,0)
-            #    #txt.draw_text("_ " * len(palabra),-20,15,30,25,255,255,255,0,0,0)
-            #    txt.draw_text(("Palabra: " + mostrar_palabra(palabra)),-20,10,30,25,255,255,255,0,0,0)
-            #    txt.draw_text(f"Intentos restantes: {intentos_restantes}",-20,5,30,25,255,255,255,0,0,0)
-            #    txt.draw_text("Adivina una letra: ",-20,0,30,25,255,255,255,0,0,0)
-            #    glPopMatrix()
-            #else:
-            #    txt.draw_text(("Lo siento, te has quedado sin intentos. La palabra era:" + palabra),-20,10,30,25,255,255,255,0,0,0)
+            # Actualizar y dibujar la palabra con formato
+            palabra_formateada = f"Palabra: {mostrar_palabra_formateada()}"
+            instruction.draw_instructions([palabra_formateada] + instrucciones_ahorcado[1:], 500, 300)  # Ajustar posición según sea necesario
     py.display.flip()
     py.time.wait(10)
