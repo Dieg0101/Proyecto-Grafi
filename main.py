@@ -11,10 +11,12 @@ from actions import luces as lc
 import textos as txt
 import colisiones as coli
 from Bombolin import Bombolin as bombolin
+from Bombolin import BombolinOportunidades as bombolinOp
 from robotec import robot
 from Instrucciones import Instrucciones
 
 import trixor
+import random
 
 py.init()
 py.mixer.init()
@@ -74,7 +76,7 @@ def draw_menu():
             txt.draw_text(item, -3, 1 - (i * 0.25), 0, 40, WHITE[0], WHITE[1], WHITE[2], BLACK[0], BLACK[1], BLACK[2])
 
     glPopMatrix()
-    #pygame.display.flip()
+    #py.display.flip()
 
 camara_speed = 0.1
 rotacion_speed = 0.2
@@ -124,7 +126,7 @@ fondos_trix_cargados = [es.load_texture(fondo) for fondo in fondos_trixor]
 sonidos = [py.mixer.Sound(f"Sounds/sonido{i}.wav") for i in range(1, 8)]
 banderas = [True, True, True, True, True, True, True, True, True, True, True]
 # Para ir eliminando parte por parte del trixor
-#bandera_actual = 10
+bandera_actual = 10
 
 escenarios_bombolin = ["fondos/fondoBomb1.jpg", "fondos/fondoBomb2.jpg", "fondos/fondoBomb3.jpg", "fondos/fondoBomb4.png", "fondos/fondoBomb5.png",
               "fondos/fondoBomb6.png","fondos/fondoBomb7.jpg"]
@@ -165,7 +167,29 @@ def drawBombolin_Menu(opcionBombolin):
         bombolin.drawBombolinSonriendo(0,0,False)
     elif opcionBombolin == 7:
         bombolin.drawBombolinIndiferente(0,0,False)
-        
+
+def drawBombolin_Menu2(opcionBombolin):
+    #glScalef(2,2,2)
+    glTranslate(5,0,0)
+    if opcionBombolin == 0:
+        bombolinOp.drawBombolinIndiferente(0,0)
+    elif opcionBombolin == 1:
+        bombolinOp.drawBombolinMuerto(0,0)     
+    elif opcionBombolin == 2:
+        bombolinOp.drawBombolinSonriendo(0,0)
+    elif opcionBombolin == 3:
+        bombolinOp.drawBombolinDudoso(0,0)       
+    elif opcionBombolin == 4:
+        bombolinOp.drawBombolinEnojado(0,0)
+    elif opcionBombolin == 5:
+        bombolinOp.drawBombolin(0,0)      
+    elif opcionBombolin == 6:
+        bombolinOp.drawBombolinSonriendo(0,0)
+    elif opcionBombolin == 7:
+        bombolinOp.drawBombolinIndiferente(0,0)
+
+
+
 def drawRobot_Menu():
     glPushMatrix()
     glTranslatef(28, 10, 10) 
@@ -223,6 +247,11 @@ trixor_selected = False
 bombolin_selected = False
 robot_selected = False
 three_selected = True
+keyboard_lock = False
+nivel_seleccionado, intentos_restantes, intentos = 0, 0, 0
+trixor_selected2 = False
+bombolin_selected2 = False
+robot_selected2 = False
 so.sonido_musica("Sounds/Music.wav")
 
 def seleccion():
@@ -239,6 +268,38 @@ def seleccion():
     trixor_selected=False
     bombolin_selected=False
     robot_selected=False
+# Lista de palabras y lógica del juego
+palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+# Función para reiniciar el juego
+palabra = random.choice(palabras).lower()
+palabra_adivinada = Falsepalabra = random.choice(palabras).lower()
+letras_adivinadas = set()
+palabra_adivinada = False
+current_variant_index = 0
+instrucciones_ahorcado = [""]
+def reset_game(intentos, nivel_seleccionado):
+    global palabra, letras_adivinadas, intentos_restantes, palabra_adivinada, current_variant_index, instrucciones_ahorcado
+    if nivel_seleccionado == 1:
+        palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+    elif nivel_seleccionado == 2:
+        palabras = ["herencia", "polimorfismo", "objeto", "encapsulamiento", "clase", "abstraccion", "software"]
+    else:
+        palabras = ["python", "programacion", "juego", "computadora", "codigo", "desarrollo", "software"]
+    palabra = random.choice(palabras).lower()
+    letras_adivinadas = set()
+    intentos_restantes = intentos
+    palabra_adivinada = False
+    current_variant_index = 0
+    instrucciones_ahorcado = [
+        "Adivina la palabra:",
+        f"Intentos restantes: {intentos_restantes}",
+        "Usa el teclado para ingresar letras.",
+        "0: Salir del juego",
+        "9: Reiniciar juego"
+    ]
+# Función para mostrar la palabra en progreso con formato de "_ _ _ _"
+def mostrar_palabra_formateada():
+    return " ".join([letra if letra in letras_adivinadas else "_" for letra in palabra])
 
 while True:
     
@@ -246,117 +307,251 @@ while True:
         if event.type == py.QUIT:
             py.quit()
             quit()
+        #Despues de presionar TAB para seleccionar un personaje
+        #para no tener que cambiar todas las demas teclas a otros botones
         if event.type == py.KEYDOWN:
-            if menu_active and event.key == py.K_DOWN:
-                selected_item = (selected_item + 1) % len(menu_items)
-                so.sonido_efecto("Sounds/FX1.wav")  # Sonido de movimiento
-            elif menu_active and event.key == py.K_UP:
-                selected_item = (selected_item - 1) % len(menu_items)
-                so.sonido_efecto("Sounds/FX1.wav")  # Sonido de movimiento
-            #Acciones que se tomaran a cabo cuando se seleccione un elemento del menu
-            elif menu_active and event.key == py.K_RETURN:
-                if selected_item == 0:      #Si se selecciona la opcion de Fundamentos de Programacion
-                    seleccion()
-                    
-                elif selected_item == 1:
-                    seleccion()
-                    
-                elif selected_item == 2:
-                    seleccion()
-                    
-                elif selected_item == 3:  # Instrucciones
-                    show_instructions = True
-                    menu_active = False
-                    so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
-                
-            elif show_instructions and event.key == py.K_ESCAPE:
-                show_instructions = False
-                menu_active = True
-                so.sonido_efecto("Sounds/FX3.wav")  # Sonido de salida
-            elif event.key == py.K_p:  # Cambiar a la variante de robot
-                current_variant_index = (current_variant_index - 1) % len(robot_variants)
-                so.play(r_sonidos_variantes[current_variant_index])
-            elif event.key == py.K_1:
-                    three_selected = False
-                    trixor_selected = True
-                    bombolin_selected = False
-                    robot_selected = False
-                    so.sonido_efecto("Sounds/FxSelected.wav")
-            elif event.key == py.K_2:
-                    three_selected = False
-                    trixor_selected = False
-                    bombolin_selected = True
-                    opcionBombolin=0
-                    robot_selected = False
-                    so.sonido_efecto("Sounds/FxSelected.wav")
-            elif event.key == py.K_3:
-                    three_selected = False
-                    robot_selected = True
-                    trixor_selected = False
-                    bombolin_selected = False
-                    so.play(r_sonidos_variantes[current_variant_index])
-            elif event.key == py.K_ESCAPE:
-                    three_selected = True
-                    trixor_selected = False
-                    bombolin_selected = False
-                    opcionBombolin =0
-                    robot_selected = False
-                    so.sonido_efecto("Sounds/FxEsc.wav")
-            elif event.key==py.K_r: #-------------------------> Gestion de eventos para los movimientos del Bombolin
-                opcionBombolin = 1
-                so.sonido_efecto("Sounds/BombolinFeliz.wav")
-                
-            elif event.key==py.K_t:
-                opcionBombolin = 2
-                so.sonido_efecto("Sounds/BombolinTriste.wav")
-                
-            elif event.key==py.K_y:
-                opcionBombolin = 3
-                so.sonido_efecto("Sounds/BombolinEnojado.wav")
-                
-            elif event.key==py.K_u:
-                opcionBombolin = 4
-                so.sonido_efecto("Sounds/BombolinSorpresa.wav")
-                
-            elif event.key==py.K_i:
-                opcionBombolin = 5
-                so.sonido_efecto("Sounds/BombolinMuerto.wav")
-                
-            elif event.key==py.K_k:
-                opcionBombolin = 6
-                so.sonido_efecto("Sounds/BombolinSonriendo.wav")
-                
-            elif event.key==py.K_l:
-                opcionBombolin = 7
-                so.sonido_efecto("Sounds/BombolinIndiferente.wav")
-                
+            if keyboard_lock:
+                if event.key == py.K_a:
+                    letra = "a"
+                    print("funciono xdddd")
+                if event.key == py.K_b:
+                    letra = "b"
+                if event.key == py.K_c:
+                    letra = "c"
+                if event.key == py.K_d:
+                    letra = "d"
+                if event.key == py.K_e:
+                    letra = "e"
+                if event.key == py.K_f:
+                    letra = "f"
+                if event.key == py.K_g:
+                    letra = "g"
+                if event.key == py.K_h:
+                    letra = "h"
+                if event.key == py.K_i:
+                    letra = "i"
+                if event.key == py.K_j:
+                    letra = "j"
+                if event.key == py.K_k:
+                    letra = "k"
+                if event.key == py.K_l:
+                    letra = "l"
+                if event.key == py.K_m:
+                    letra = "m"
+                if event.key == py.K_n:
+                    letra = "n"
+                if event.key == py.K_o:
+                    letra = "o"
+                if event.key == py.K_p:
+                    letra = "p"
+                if event.key == py.K_q:
+                    letra = "q"
+                if event.key == py.K_r:
+                    letra = "r"
+                if event.key == py.K_s:
+                    letra = "s"
+                if event.key == py.K_t:
+                    letra = "t"
+                if event.key == py.K_u:
+                    letra = "u"
+                if event.key == py.K_v:
+                    letra = "v"
+                if event.key == py.K_w:
+                    letra = "w"
+                if event.key == py.K_x:
+                    letra = "x"
+                if event.key == py.K_y:
+                    letra = "y"
+                if event.key == py.K_z:
+                    letra = "z"
+                if event.key == py.K_0:
+                    py.quit()
+                    quit()
+                # Reiniciar el juego al presionar '9'
+                if event.key == py.K_9:
+                    reset_game(intentos,nivel_seleccionado)
+                    opcionBombolin=5    #Reestablece las "Emociones" del bombolin
+    
+                # Captura de letras para el juego de ahorcado si la palabra aún no ha sido adivinada
+                if not palabra_adivinada and intentos_restantes > 0 and event.unicode.isalpha() and len(event.unicode) == 1:
+                    letra = event.unicode.lower()
+                    if letra not in letras_adivinadas:
+                        letras_adivinadas.add(letra)
+                        if letra not in palabra:
+                            intentos_restantes -= 1
+                            instrucciones_ahorcado[1] = f"Intentos restantes: {intentos_restantes}"
+                            instrucciones_ahorcado.append(f"La letra '{letra}' no está en la palabra.")
+                            if bombolin_selected2:
+                                if intentos_restantes == 4:
+                                    print("Perdiendo 1")
+                                    bombolinOp.drawBombolinFeliz(0,0)
+                                    opcionBombolin = intentos_restantes
+                                    #pass
+                                elif intentos_restantes == 3:
+                                    print("Perdiendo 2")
+                                    opcionBombolin = intentos_restantes
+                                    pass
+                                elif intentos_restantes == 2:
+                                    print("Perdiendo 3")
+                                    opcionBombolin = intentos_restantes
+                                    pass
+                                elif intentos_restantes == 1:
+                                    print("Perdiendo 4")
+                                    opcionBombolin = intentos_restantes
+                                    pass
+                                elif intentos_restantes == 0:
+                                    print("Perdiendo 5")
+                                    opcionBombolin = intentos_restantes
+                                    pass
 
-    # Controles de la cámara
-    keys = py.key.get_pressed()
-    if keys[py.K_e]:
-        glTranslate(0, 0, 10)
-    if keys[py.K_q]:
-        glTranslate(0, 0, -10)
-    if keys[py.K_d]:
-        glTranslate(-10, 0, 0)
-    if keys[py.K_a]:
-        glTranslate(10, 0, 0)
-    if keys[py.K_w]:
-        glTranslate(0, -10, 0)
-    if keys[py.K_s]:
-        glTranslate(0, 10, 0)
-    if keys[py.K_0]:
-         py.quit()
-         quit()
-    if event.type == py.MOUSEBUTTONDOWN:
-        if event.button == 1:  # Botón izquierdo
-            sonidos[cuerpo_actual].stop()
-            cuerpo_actual = (cuerpo_actual + 1) % 7
-            sonidos[cuerpo_actual].play()
-        elif event.button == 3:  # Botón derecho
-            sonidos[cuerpo_actual].stop()
-            cuerpo_actual = (cuerpo_actual - 1) % 7
-            sonidos[cuerpo_actual].play()
+
+                        else:
+                            instrucciones_ahorcado.append(f"¡Bien hecho! La letra '{letra}' está en la palabra.")
+                        # Verificar si se han quedado sin intentos
+                        if intentos_restantes == 0:
+                            instrucciones_ahorcado.append("Te has quedado sin intentos.")
+                            instrucciones_ahorcado.append(f"La palabra correcta era: {palabra}")
+                            current_variant_index = 5
+    
+                    # Verificar si se adivinó la palabra
+                    if all(letra in letras_adivinadas for letra in palabra):
+                        palabra_adivinada = True
+                        instrucciones_ahorcado.append("¡Felicidades! Has adivinado la palabra.")
+                        current_variant_index = 3  # Cambiar a la variante 3 del robot
+            else:
+                if menu_active and event.key == py.K_DOWN:
+                    selected_item = (selected_item + 1) % len(menu_items)
+                    so.sonido_efecto("Sounds/FX1.wav")  # Sonido de movimiento
+                elif menu_active and event.key == py.K_UP:
+                    selected_item = (selected_item - 1) % len(menu_items)
+                    so.sonido_efecto("Sounds/FX1.wav")  # Sonido de movimiento
+                #Acciones que se tomaran a cabo cuando se seleccione un elemento del menu
+                elif menu_active and event.key == py.K_RETURN:
+                    if selected_item == 0:  #Si se selecciona la opcion de Fundamentos de Programacion
+                        seleccion()
+                        nivel_seleccionado = 1
+                        
+                    elif selected_item == 1:
+                        seleccion()
+                        nivel_seleccionado = 2
+                        
+                    elif selected_item == 2:
+                        seleccion()
+                        nivel_seleccionado = 3
+                        
+                    elif selected_item == 3:  # Instrucciones
+                        show_instructions = True
+                        menu_active = False
+                        so.sonido_efecto("Sounds/FX2.wav")  # Sonido de selección
+                    
+                elif show_instructions and event.key == py.K_ESCAPE:
+                    show_instructions = False
+                    menu_active = True
+                    so.sonido_efecto("Sounds/FX3.wav")  # Sonido de salida
+                elif event.key == py.K_p and robot_selected :  # Cambiar a la variante de robot
+                    current_variant_index = (current_variant_index - 1) % len(robot_variants)
+                    so.play(r_sonidos_variantes[current_variant_index])
+                elif event.key == py.K_1:
+                        three_selected = False
+                        trixor_selected = True
+                        bombolin_selected = False
+                        robot_selected = False
+                        so.sonido_efecto("Sounds/FxSelected.wav")
+                elif event.key == py.K_2:
+                        three_selected = False
+                        trixor_selected = False
+                        bombolin_selected = True
+                        opcionBombolin=0
+                        robot_selected = False
+                        so.sonido_efecto("Sounds/FxSelected.wav")
+                elif event.key == py.K_3:
+                        three_selected = False
+                        robot_selected = True
+                        trixor_selected = False
+                        bombolin_selected = False
+                        so.play(r_sonidos_variantes[current_variant_index])
+                elif event.key == py.K_ESCAPE:
+                        three_selected = True
+                        trixor_selected = False
+                        bombolin_selected = False
+                        opcionBombolin =0
+                        robot_selected = False
+                        so.sonido_efecto("Sounds/FxEsc.wav")
+                elif event.key==py.K_r and bombolin_selected: #-------------------------> Gestion de eventos para los movimientos del Bombolin
+                    opcionBombolin = 1
+                    so.sonido_efecto("Sounds/BombolinFeliz.wav")
+                    
+                elif event.key==py.K_t and bombolin_selected:
+                    opcionBombolin = 2
+                    so.sonido_efecto("Sounds/BombolinTriste.wav")
+                    
+                elif event.key==py.K_y and bombolin_selected:
+                    opcionBombolin = 3
+                    so.sonido_efecto("Sounds/BombolinEnojado.wav")
+                    
+                elif event.key==py.K_u and bombolin_selected: 
+                    opcionBombolin = 4
+                    so.sonido_efecto("Sounds/BombolinSorpresa.wav")
+                    
+                elif event.key==py.K_i and bombolin_selected:
+                    opcionBombolin = 5
+                    so.sonido_efecto("Sounds/BombolinMuerto.wav")
+                    
+                elif event.key==py.K_k and bombolin_selected:
+                    opcionBombolin = 6
+                    so.sonido_efecto("Sounds/BombolinSonriendo.wav")
+                    
+                elif event.key==py.K_l and bombolin_selected:
+                    opcionBombolin = 7
+                    so.sonido_efecto("Sounds/BombolinIndiferente.wav")
+                #elif event.key == py.K_9:
+                #    banderas[bandera_actual] = False
+                #    bandera_actual -= 1
+                elif event.key == K_TAB:
+                    keyboard_lock = True
+                    mouse_active = False
+                    if trixor_selected:
+                        trixor_selected2 = True
+                        intentos = 10
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
+                    elif bombolin_selected:
+                        bombolin_selected2 = True
+                        opcionBombolin = 5
+                        intentos = 5
+                        
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
+                    else:
+                        robot_selected2 = True
+                        intentos = 3
+                        reset_game(intentos,nivel_seleccionado)  # Inicializar el primer juego
+    
+                # Controles de la cámara
+                keys = py.key.get_pressed()
+                #if keys[py.K_e]:
+                #    glTranslate(0, 0, 10)
+                #if keys[py.K_q]:
+                #    glTranslate(0, 0, -10)
+                #if keys[py.K_d]:
+                #   glTranslate(-10, 0, 0)
+                #if keys[py.K_a]:
+                #    glTranslate(10, 0, 0)
+                #if keys[py.K_w]:
+                #    glTranslate(0, -10, 0)
+                #if keys[py.K_s]:
+                #    glTranslate(0, 10, 0)
+                if keys[py.K_0]:
+                     py.quit()
+                     quit()
+    if not keyboard_lock:
+        if event.type == py.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Botón izquierdo
+                sonidos[cuerpo_actual].stop()
+                cuerpo_actual = (cuerpo_actual + 1) % 7
+                sonidos[cuerpo_actual].play()
+            elif event.button == 3:  # Botón derecho
+                sonidos[cuerpo_actual].stop()
+                cuerpo_actual = (cuerpo_actual - 1) % 7
+                sonidos[cuerpo_actual].play()
     # Capturar eventos de movimiento del mouse solo si `mouse_active` es True
     if mouse_active and event.type == py.MOUSEMOTION:
         # Rotar cámara con el mouse
@@ -438,7 +633,61 @@ while True:
             instruction.draw_instructions(instrucciones_seleccionarBombolin, 300, 70)
             instruction.draw_instructions(instrucciones_seleccionarRobot, 500, 150)
 
-            glPopMatrix()     
+            glPopMatrix()
+        if trixor_selected2:
+            #glRotatef(180, 0, 1, 0)
+            #glScalef(4, 4, 4)
+            glPushMatrix()
+            #glTranslatef(-55,15,55)
+            lc.iluminacion("Interpolado")
+            drawTrixor_Menu(cuerpo_actual,banderas)
+            glTranslate(30,-30,-30)
+            glDisable(GL_LIGHTING)
+            #escenario_actual = "fondos/fondoMenu2.jpg"
+            glEnable(GL_TEXTURE_2D)
+            es.draw_escenario(fondos_trix_cargados[cuerpo_actual])
+            glDisable(GL_TEXTURE_2D)
+            instruction.draw_instructions(instrucciones_Trixor, 500, 10)    
+            glPopMatrix()
+            #ahorcado()
+        if bombolin_selected2:
+            #TRASLADAR PERSONAJE AL FONDO
+            #drawBombolin_Menu()
 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glPushMatrix()
+            glScalef(7,7,7)
+            glTranslatef(-10,0,0)
+            lc.iluminacion("Interpolado")
+            glTranslatef(-7,-4,4)
+            drawBombolin_Menu2(opcionBombolin)
+            glEnable(GL_TEXTURE_2D)     
+            es.draw_escenario(escenarios_cargadosBombolin[opcionBombolin-1])     
+            glDisable(GL_TEXTURE_2D)   
+            instruction.draw_instructions(instrucciones_Bombolin, 500, 10)
+            glPopMatrix()
+
+        if robot_selected2:
+            #TRASLADAR PERSONAJE AL FONDO DEL ESCENARIO
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            glPushMatrix()
+            glDisable(GL_LIGHTING)
+            
+            glPushMatrix()
+            glScalef(5.5, 5.5, 5.5)  
+            glRotatef(180, 0, 1, 0)
+            glTranslatef(0,5,0)
+            robot_variants[current_variant_index]()
+            glPopMatrix()
+
+            glEnable(GL_TEXTURE_2D)
+            es.draw_escenario(fondos_variantes[current_variant_index])
+            glDisable(GL_TEXTURE_2D)
+            instruction.draw_instructions(instrucciones_Robot, 500, 10)
+            glPopMatrix()
+        if trixor_selected2 or bombolin_selected2 or robot_selected2:
+            # Actualizar y dibujar la palabra con formato
+            palabra_formateada = f"Palabra: {mostrar_palabra_formateada()}"
+            instruction.draw_instructions([palabra_formateada] + instrucciones_ahorcado[1:], 500, 300)  # Ajustar posición según sea necesario
     py.display.flip()
     py.time.wait(10)
